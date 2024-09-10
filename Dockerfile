@@ -1,7 +1,7 @@
 FROM ubuntu/squid:latest
 
-# Install Nginx and Python
-RUN apt-get update && apt-get install -y nginx python3
+# Install Nginx, Python, and Supervisor
+RUN apt-get update && apt-get install -y nginx python3 supervisor
 
 # Copy Squid config
 COPY squid.conf /etc/squid/squid.conf
@@ -31,5 +31,18 @@ http {\n\
     }\n\
 }' > /etc/nginx/nginx.conf
 
-# Start Squid, Nginx, and Python server
-CMD service nginx start && python3 /root/server.py & squid -N -d 1
+# Create Supervisor config
+RUN echo '[supervisord]\n\
+nodaemon=true\n\
+\n\
+[program:squid]\n\
+command=squid -N\n\
+\n\
+[program:nginx]\n\
+command=nginx -g "daemon off;"\n\
+\n\
+[program:python_server]\n\
+command=python3 /root/server.py' > /etc/supervisor/conf.d/supervisord.conf
+
+# Start Supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
