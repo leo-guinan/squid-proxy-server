@@ -32,4 +32,4 @@ http {\n\
 }' > /etc/nginx/nginx.conf
 
 # Start Squid, Nginx, and Python server
-CMD service nginx start && python3 /root/server.py & squid -NYC
+CMD service nginx start && python3 /root/server.py & squid -N -d 1
